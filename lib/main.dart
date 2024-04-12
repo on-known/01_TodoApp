@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_todo_11april24/Pages/HomePage.dart';
+import 'package:flutter_todo_11april24/pages/home_page.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 void main() async {

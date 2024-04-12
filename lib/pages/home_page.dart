@@ -1,4 +1,3 @@
-// ignore: file_names
 import 'package:flutter/material.dart';
 import 'package:flutter_todo_11april24/data/database.dart';
 import 'package:flutter_todo_11april24/utalities/DiologueBox.dart';
@@ -43,11 +42,15 @@ class _HomePageState extends State<HomePage> {
 
   void saveNewTask() {
     setState(() {
-      db.todolist.add([_controller.text, false]);
-      Navigator.of(context).pop();
-      _controller.clear();
+      if (_controller.text.isNotEmpty) {
+        db.todolist.add([_controller.text, false]);
+        Navigator.of(context).pop();
+        _controller.clear();
+        db.updateDataBase();
+      } else {
+        Navigator.of(context).pop();
+      }
     });
-    db.updateDataBase();
   }
 
   void deleteTask(int index) {
