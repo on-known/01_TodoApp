@@ -1,7 +1,10 @@
 // ignore: file_names
 import 'package:flutter/material.dart';
+import 'package:flutter_todo_11april24/data/database.dart';
 import 'package:flutter_todo_11april24/utalities/DiologueBox.dart';
 import 'package:flutter_todo_11april24/utalities/todo_tiles.dart';
+import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -11,15 +14,17 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  final _mybox = Hive.box("mybox");
   bool taskstatus = false;
   final _controller = TextEditingController();
 
-  List todolist = [];
+  ToDoDataBase db = ToDoDataBase();
 
   void checkboxchanged(bool? value, int index) {
     setState(() {
-      todolist[index][1] = !todolist[index][1];
+      db.todolist[index][1] = !db.todolist[index][1];
     });
+    db.updateDataBase();
   }
 
   void createNewTask() {
@@ -38,10 +43,31 @@ class _HomePageState extends State<HomePage> {
 
   void saveNewTask() {
     setState(() {
-      todolist.add([_controller.text, false]);
+      db.todolist.add([_controller.text, false]);
       Navigator.of(context).pop();
       _controller.clear();
     });
+    db.updateDataBase();
+  }
+
+  void deleteTask(int index) {
+    setState(() {
+      db.todolist.removeAt(index);
+    });
+    db.updateDataBase();
+  }
+
+  @override
+  void initState() {
+    //if this is the first time open the app , then create deafault data
+
+    if (_mybox.get("TODOLIST") == null) {
+      db.createinitialData();
+    } else {
+      // this will load previus data
+      db.loadData();
+    }
+    super.initState();
   }
 
   @override
@@ -52,23 +78,22 @@ class _HomePageState extends State<HomePage> {
         elevation: 0,
       ),
       body: ListView.builder(
-        itemCount: todolist.length,
+        itemCount: db.todolist.length,
         itemBuilder: (BuildContext context, int index) {
           return TodoTiles(
-            taskName: todolist[index][0],
+            taskName: db.todolist[index][0],
             onChanged: (value) {
               checkboxchanged(taskstatus, index);
             },
-            taskcompled: todolist[index][1],
+            taskcompled: db.todolist[index][1],
             deleteFunction: (value) {
-              setState(() {
-                todolist.removeAt(index);
-              });
+              deleteTask(index);
             },
           );
         },
       ),
       floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.yellow,
         onPressed: () {
           createNewTask();
         },
